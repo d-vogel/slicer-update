@@ -2,8 +2,6 @@
 # versions: "stable" or "latest"
 # directory: the directory where the slicer binary will be installed
 # Example: slicer-update.sh stable /opt/slicer
-    # this untar the slicer installation to /opt/slicer/<dir> where <dir> is the dowloaded archive name
-# the script will create a symbolic link to the slicer binary to /opt/slicer/Slicer
 
 # how to get the download link for the slicer binary:
 # https://download.slicer.org/download?os=<OS>&stability=<stability>
@@ -50,7 +48,10 @@ download_and_install_linux() {
     #check the downloaded file
     FILECHECKSUM=$(sha512sum "slicer-$VERSION.tar.gz" | cut -d ' ' -f1)
     if [ "$(sha512sum "slicer-$VERSION.tar.gz" | cut -d ' ' -f1)" != "$CHECKSUM" ]; then
-        echo "Checksums do not match (\n\tDownloaded: $FILECHECKSUM\n\tExpected: $CHECKSUM)\nDo you want to continue? [y/n]"
+        echo "Checksums do not match !"
+        echo "    Downloaded: $FILECHECKSUM"
+        echo "    Expected:   $CHECKSUM"
+        echo "Do you want to continue? [y/n]"
         read -r response
         if [ "$response" != "n" ]; then
             exit 1
