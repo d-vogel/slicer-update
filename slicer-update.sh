@@ -40,11 +40,11 @@ download_and_install_linux() {
     if [ -f "slicer-$VERSION.tar.gz" ]; then
         if [ "$(sha512sum "slicer-$VERSION.tar.gz" | cut -d ' ' -f1)" == "$CHECKSUM" ]; then
             echo "Slicer already downloaded"
-        else    
-            wget -O slicer-$VERSION.tar.gz "$URL"
         fi
-
+    else    
+        wget -O slicer-$VERSION.tar.gz "$URL"
     fi
+
     #check the downloaded file
     FILECHECKSUM=$(sha512sum "slicer-$VERSION.tar.gz" | cut -d ' ' -f1)
     if [ "$(sha512sum "slicer-$VERSION.tar.gz" | cut -d ' ' -f1)" != "$CHECKSUM" ]; then
