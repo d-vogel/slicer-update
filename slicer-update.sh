@@ -51,11 +51,20 @@ download_and_install_linux() {
         echo "Checksums do not match !"
         echo "    Downloaded: $FILECHECKSUM"
         echo "    Expected:   $CHECKSUM"
-        echo "Do you want to continue? [y/n]"
+        echo "What should we do? Retry/Abord/Ignore [r/a/i]"
         read -r response
-        if [ "$response" != "n" ]; then
-            exit 1
-        fi
+        case $response in
+            r)
+                rm slicer-$VERSION.tar.gz
+                download_and_install_linux
+                ;;
+            a)
+                exit 1
+                ;;
+            i)
+                echo "Ignoring checksum mismatch"
+                ;;
+        esac
     fi
     
     SLICER_DIR=$(tar -tf slicer-$VERSION.tar.gz | head -1 | cut -f1 -d"/")
@@ -74,6 +83,11 @@ download_and_install_linux() {
     read -r response
     if [ "$response" != "n" ]; then
         rm slicer-$VERSION.tar.gz
+    fi
+    echo "Do you want to create a desktop file? [y/n]"
+    read -r response
+    if [ "$response" != "n" ]; then
+        create_desktop_file_linux
     fi
     
 }
@@ -126,6 +140,42 @@ get_checksum() {
     echo $CHECKSUM
 }
 
+create_desktop_file_linux() {
+    if [ ! -f "/opt/slicer/3D-Slicer-Mark.svg" ]; then
+        wget https://raw.githubusercontent.com/Slicer/Slicer/refs/heads/main/Docs/_static/images/3D-Slicer-Mark.svg -O /opt/slicer/3D-Slicer-Mark.svg
+    fi
+    cat <<EOF > /usr/share/applications/Slicer-${VERSION}.desktop
+[Desktop Entry]
+
+# The type as listed above
+Type=Application
+
+# The version of the desktop entry specification to which this file complies
+Version=5.3.0
+
+# The name of the application
+Name=3D Slicer (${VERSION})
+
+# A comment which can/will be used as a tooltip
+Comment=Medical Image processing/visualization platform
+
+# The path to the folder in which the executable is run
+Path=/home
+
+# The executable of the application, possibly with arguments.
+Exec=$INSTALL_DIR/$SLICER_DIR/Slicer
+
+# The name of the icon that will be used to display this entry
+Icon=/opt/slicer/3D-Slicer-Mark.svg
+
+# Describes whether this application needs to be run in a terminal or not
+Terminal=false
+
+# Describes the categories in which this entry should be shown
+Categories=Education;Science;
+EOF
+}
+
 CHECKSUM=$(get_checksum)
 
 case "$OS" in
@@ -143,3 +193,4 @@ case "$OS" in
         exit 1
         ;;
 esac
+echo "Done"
