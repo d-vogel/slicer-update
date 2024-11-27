@@ -15,6 +15,6 @@ When installing system-wide, the scipt will fix permissions on the extension dir
 
 
 ## TODO:
-- Download icon, create .desktop file
+- ~~Download icon, create .desktop file~~ <- done in 5e1c81119b8e0607a54d79da96391f4b823f6068
 - At this point why not using Open Build System?
 - MacOS version...
