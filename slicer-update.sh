@@ -30,11 +30,7 @@ URL="https://download.slicer.org/download?os=${OS}&stability=${VERSION}"
 echo "Downloading Slicer from $URL"
 
 download_and_install_linux() {
-    # first check if the user has write access to the install dir
-    if [ ! -w "$INSTALL_DIR" ]; then
-        echo "You do not have write access to $INSTALL_DIR. Start the installer with sudo."
-        exit 1
-    fi
+
 
     # dont download if a file with the expected checksum already exists
     if [ -f "slicer-$VERSION.tar.gz" ]; then
@@ -68,9 +64,15 @@ download_and_install_linux() {
     fi
     
     SLICER_DIR=$(tar -tf slicer-$VERSION.tar.gz | head -1 | cut -f1 -d"/")
-    
+    SLICER_VERSION_NUMBER=$(echo $SLICER_DIR | cut -d "-" -f2)
 
     mkdir -p "$INSTALL_DIR"
+    # first check if the user has write access to the install dir
+    if [ ! -w "$INSTALL_DIR" ]; then
+        echo "You do not have write access to $INSTALL_DIR. Start the installer with sudo."
+        exit 1
+    fi
+
     tar -xzf slicer-$VERSION.tar.gz -C "$INSTALL_DIR"
     ln -sf "$INSTALL_DIR/$SLICER_DIR/Slicer" "$INSTALL_DIR/Slicer"
     if [ $(id -u) == 0 ]; then
@@ -142,7 +144,7 @@ get_checksum() {
 
 create_desktop_file_linux() {
     if [ ! -f "/opt/slicer/3D-Slicer-Mark.svg" ]; then
-        wget https://raw.githubusercontent.com/Slicer/Slicer/refs/heads/main/Docs/_static/images/3D-Slicer-Mark.svg -O /opt/slicer/3D-Slicer-Mark.svg
+        curl -o $INSTALL_DIR/$SLICER_DIR/3D-Slicer-Mark.svg https://raw.githubusercontent.com/Slicer/Slicer/refs/heads/main/Docs/_static/images/3D-Slicer-Mark.svg
     fi
     cat <<EOF > /usr/share/applications/Slicer-${VERSION}.desktop
 [Desktop Entry]
@@ -151,7 +153,7 @@ create_desktop_file_linux() {
 Type=Application
 
 # The version of the desktop entry specification to which this file complies
-Version=5.3.0
+Version=${SLICER_VERSION_NUMBER}
 
 # The name of the application
 Name=3D Slicer (${VERSION})
@@ -166,7 +168,7 @@ Path=/home
 Exec=$INSTALL_DIR/$SLICER_DIR/Slicer
 
 # The name of the icon that will be used to display this entry
-Icon=/opt/slicer/3D-Slicer-Mark.svg
+Icon=$INSTALL_DIR/$SLICER_DIR/3D-Slicer-Mark.svg
 
 # Describes whether this application needs to be run in a terminal or not
 Terminal=false
